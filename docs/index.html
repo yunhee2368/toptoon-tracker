@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>탑툰챗 트래커</title>
+<style>
+.viz-root{color-scheme:light;--surface-0:#f6f6f4;--surface-1:#ffffff;--border:#e4e4e0;--grid:#ececec;
+  --text-primary:#191919;--text-secondary:#666666;--series-1:#257de0;--series-1-soft:#b6d5f8;--neutral:#bdbdbd;
+  --good:#008a17;--bad:#d83a3b}
+@media (prefers-color-scheme:dark){:root:where(:not([data-theme="light"])) .viz-root{color-scheme:dark;
+  --surface-0:#111111;--surface-1:#191919;--border:#2e2e2e;--grid:#262626;--text-primary:#efefef;--text-secondary:#9c9c9c;
+  --series-1:#338ced;--series-1-soft:#1d3d63;--neutral:#5a5a5a;--good:#0aac23;--bad:#eb6263}}
+:root[data-theme="dark"] .viz-root{color-scheme:dark;--surface-0:#111111;--surface-1:#191919;--border:#2e2e2e;--grid:#262626;
+  --text-primary:#efefef;--text-secondary:#9c9c9c;--series-1:#338ced;--series-1-soft:#1d3d63;--neutral:#5a5a5a;--good:#0aac23;--bad:#eb6263}
+*{box-sizing:border-box}
+body{margin:0}
+.viz-root{background:var(--surface-0);color:var(--text-primary);min-height:100vh;
+  font:14px/1.55 -apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+  font-variant-numeric:tabular-nums}
+main{max-width:1080px;margin:0 auto;padding:28px 20px 60px}
+h1{font-size:22px;margin:0 0 4px}
+h2{font-size:17px;margin:36px 0 6px}
+p.note{color:var(--text-secondary);margin:4px 0 14px;font-size:13px}
+.meta{color:var(--text-secondary);font-size:13px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:18px}
+.tile{background:var(--surface-1);border:1px solid var(--border);border-radius:10px;padding:16px}
+.tile .k{color:var(--text-secondary);font-size:12.5px}
+.tile .v{font-size:28px;font-weight:700;letter-spacing:-.5px;margin:4px 0 2px}
+.tile .s{color:var(--text-secondary);font-size:12.5px}
+.up{color:var(--good)}.down{color:var(--bad)}
+.card{background:var(--surface-1);border:1px solid var(--border);border-radius:10px;padding:14px 16px;position:relative}
+.grid4{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.card h3{font-size:14px;margin:0}
+.card .hv{font-size:19px;font-weight:700}
+svg{display:block;width:100%;overflow:visible}
+svg text{fill:var(--text-secondary);font-size:11px}
+.tip{position:absolute;pointer-events:none;background:var(--surface-1);border:1px solid var(--border);border-radius:6px;
+  padding:6px 9px;font-size:12px;box-shadow:0 2px 8px rgba(0,0,0,.12);white-space:nowrap;display:none;z-index:5}
+table{border-collapse:collapse;width:100%;font-size:13px;background:var(--surface-1)}
+th,td{padding:7px 9px;border-bottom:1px solid var(--border);text-align:right}
+th:first-child,td:first-child,td.t,th.t{text-align:left}
+th{color:var(--text-secondary);font-weight:600;font-size:12px}
+.tablewrap{overflow-x:auto;border:1px solid var(--border);border-radius:10px}
+.tabs{display:flex;gap:6px;margin:8px 0 10px;flex-wrap:wrap}
+.tabs button{border:1px solid var(--border);background:var(--surface-1);color:var(--text-primary);border-radius:999px;
+  padding:5px 12px;font:inherit;font-size:13px;cursor:pointer}
+.tabs button[aria-pressed="true"]{background:var(--text-primary);color:var(--surface-1);border-color:var(--text-primary)}
+details{margin-top:8px}summary{cursor:pointer;color:var(--text-secondary);font-size:13px}
+.empty{padding:28px;text-align:center;color:var(--text-secondary)}
+dl.terms dt{font-weight:600;margin-top:10px}dl.terms dd{margin:2px 0 0;color:var(--text-secondary)}
+</style>
+</head>
+<body>
+<div class="viz-root"><main>
+  <h1>탑툰챗 트래커</h1>
+  <div class="meta" id="meta">불러오는 중…</div>
+  <p class="note">네 지역(한국·일본·대만·글로벌) 탑툰챗의 공개 chatCount(채팅 시작 수)를 매시간 모아, 하루치 신규 채팅과 추정 매출을 계산합니다.
+  추정 매출 = 신규 채팅 × 채팅 1건당 계수이며, 계수는 분기 실적으로 보정하기 전까지 임시값입니다.</p>
+
+  <div class="tiles" id="tiles"></div>
+
+  <h2>일간 추정 매출 · 네 지역 합계</h2>
+  <p class="note">옅은 막대는 그날그날의 값, 선은 7일 평균입니다. 막대에 마우스를 올리면 날짜별 값이 보입니다.</p>
+  <div class="card" id="combinedChart"></div>
+  <details><summary>표로 보기</summary><div class="tablewrap" id="combinedTable"></div></details>
+
+  <h2>지역별 일간 신규 채팅</h2>
+  <p class="note">세로축은 지역마다 따로 잡았습니다. 지역끼리는 높이가 아니라 모양(기울기)을 비교하세요.</p>
+  <div class="grid4" id="regionCharts"></div>
+
+  <h2>지역 요약</h2>
+  <p class="note">"신규 비중"은 최근 7일 신규 채팅 가운데 출시 <span class="nd"></span>일 이내 항목에서 나온 비율입니다. 높을수록 신작 출시에 기대는 구조입니다.</p>
+  <div class="tablewrap" id="regionTable"></div>
+
+  <h2>항목 순위</h2>
+  <p class="note" id="rankNote">최근 신규 채팅 순.</p>
+  <div class="tabs" id="rankTabs" role="group" aria-label="지역 선택"></div>
+  <div class="tablewrap" id="rankTable"></div>
+
+  <h2>최근 출시 항목</h2>
+  <div class="tabs" id="launchTabs" role="group" aria-label="지역 선택"></div>
+  <div class="tablewrap" id="launchTable"></div>
+
+  <h2>월별 댓글</h2>
+  <p class="note">채팅 수의 과거 값은 알 수 없어, 작성 시각이 남는 댓글로 출시 이후 방향을 봅니다. 댓글을 쓰는 이용자는 일부라 크기가 아니라 방향만 참고하세요.</p>
+  <div class="tablewrap" id="commentTable"></div>
+
+  <h2>계수 보정</h2>
+  <p class="note">분기 챗 매출 ÷ 그 분기 신규 채팅 수. 분기 전체(85일 이상)가 수집돼야 계산되며, 나온 값을 config.py의 WON_PER_NEW_CHAT에 넣으면 됩니다.</p>
+  <div class="tablewrap" id="calTable"></div>
+
+  <h2>용어</h2>
+  <dl class="terms">
+    <dt>chatCount · 신규 채팅</dt><dd>각 캐릭터·멀티챗에 공개된 누적 채팅 시작 수. 그날 첫 기록과 다음 날 첫 기록의 차이를 그날의 신규 채팅으로 봅니다. 한 채팅 안에서 오래 이어지는 대화는 잡히지 않습니다.</dd>
+    <dt>제외 항목</dt><dd>전날 기록에는 없었는데 출시일이 그 이전인 항목(뒤늦게 공개·발견된 항목)은 누적값이 한 번에 더해지지 않도록 그날 계산에서 뺍니다.</dd>
+    <dt>분기 추정</dt><dd>이번 분기에 관측한 날의 추정 매출 합 + 남은(또는 관측하지 못한) 날 × 최근 7일 평균.</dd>
+    <dt>전주 대비</dt><dd>최근 7일 합 ÷ 그 전 7일 합. 14일이 쌓여야 계산됩니다.</dd>
+  </dl>
+</main></div>
+<script>
+const fmtN = n => n == null ? "–" : Math.round(n).toLocaleString("ko-KR");
+const man = w => w == null ? "–" : w === 0 ? "0" : (Math.abs(w) >= 1e8 ? (w/1e8).toFixed(1)+"억" : Math.round(w/1e4).toLocaleString("ko-KR")+"만");
+const pct = (r, d=1) => r == null ? "–" : (r*100).toFixed(d)+"%";
+const chg = r => r == null ? '<span>–</span>' :
+  `<span class="${r>=1?'up':'down'}">${r>=1?'▲':'▼'} ${Math.abs((r-1)*100).toFixed(1)}%</span>`;
+const WK = "일월화수목금토";
+const dl = d => { const x = new Date(d+"T00:00:00+09:00"); return `${x.getMonth()+1}/${x.getDate()}(${WK[x.getDay()]})`; };
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+/* 4칸 눈금이 1·2·2.5·5 × 10^k 단위로 떨어지도록 최댓값을 올림 */
+function niceMax(v){ if(!v) return 4; const raw = v/4, p = 10**Math.floor(Math.log10(raw));
+  const step = [1,2,2.5,5,10].map(m=>m*p).find(s=>s>=raw); return step*4; }
+
+/* 막대(하루) + 선(7일 평균) 차트. 축 0부터, 세로축 하나. */
+function barLine(el, rows, {val, ma, fmt, height=220, label}){
+  if(!rows.length){ el.innerHTML = '<div class="empty">아직 하루치 데이터가 없습니다. 이틀째 첫 기록 이후부터 표시됩니다.</div>'; return; }
+  const W = Math.max(220, Math.round(el.clientWidth - 32)), H = height, L = 52, R = 8, T = 10, B = 26;
+  const max = niceMax(Math.max(...rows.map(val)));
+  const n = rows.length, bw = (W-L-R)/n, gap = Math.min(2, bw*0.25);
+  const x = i => L + i*bw, y = v => T + (H-T-B)*(1 - v/max);
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(label)}">`;
+  for(let k=0;k<=4;k++){ const v=max*k/4, yy=y(v);
+    s += `<line x1="${L}" x2="${W-R}" y1="${yy}" y2="${yy}" stroke="var(--grid)"/>`;
+    s += `<text x="${L-8}" y="${yy+4}" text-anchor="end">${fmt(v)}</text>`; }
+  rows.forEach((r,i)=>{ const v = val(r), h = (H-T-B)*v/max, w = Math.max(1,bw-gap), rad = Math.min(4, w/2);
+    const x0 = x(i)+gap/2, y0 = y(v);
+    s += h>0 ? `<path d="M${x0},${H-B} V${y0+rad} q0,-${rad} ${rad},-${rad} h${w-2*rad} q${rad},0 ${rad},${rad} V${H-B} Z" fill="var(--series-1-soft)"/>` : "";
+  });
+  const pts = rows.map((r,i)=> ma(r)==null ? null : [x(i)+bw/2, y(ma(r))]);
+  let d = "", on = false; pts.forEach(p=>{ if(!p){on=false;return;} d += (on?"L":"M")+p[0].toFixed(1)+","+p[1].toFixed(1); on=true; });
+  if(d) s += `<path d="${d}" fill="none" stroke="var(--series-1)" stroke-width="2" stroke-linejoin="round"/>`;
+  const step = Math.max(1, Math.ceil(n / Math.max(2, Math.floor((W-L)/90))));
+  rows.forEach((r,i)=>{ if(i%step===0 || i===n-1) s += `<text x="${x(i)+bw/2}" y="${H-8}" text-anchor="middle">${dl(r.date)}</text>`; });
+  s += `<line class="cross" x1="0" x2="0" y1="${T}" y2="${H-B}" stroke="var(--text-secondary)" stroke-dasharray="3 3" visibility="hidden"/>`;
+  rows.forEach((r,i)=>{ s += `<rect x="${x(i)}" y="${T}" width="${bw}" height="${H-T-B}" fill="transparent" data-i="${i}"/>`; });
+  s += `</svg><div class="tip"></div>`;
+  el.insertAdjacentHTML("beforeend", s);
+  const svg = el.querySelector("svg:last-of-type"), tip = el.querySelector(".tip:last-of-type"), cross = svg.querySelector(".cross");
+  svg.addEventListener("mousemove", e=>{ const t = e.target.closest("rect[data-i]"); if(!t){return;}
+    const i = +t.dataset.i, r = rows[i], cx = x(i)+bw/2;
+    cross.setAttribute("x1",cx); cross.setAttribute("x2",cx); cross.setAttribute("visibility","visible");
+    tip.innerHTML = `<b>${dl(r.date)}</b><br>하루 ${fmt(val(r))}<br>7일 평균 ${ma(r)==null?"–":fmt(ma(r))}`;
+    tip.style.display = "block";
+    const box = el.getBoundingClientRect(); let lx = e.clientX - box.left + 12;
+    if(lx + tip.offsetWidth > box.width) lx = e.clientX - box.left - tip.offsetWidth - 12;
+    tip.style.left = lx+"px"; tip.style.top = (e.clientY - box.top - 10)+"px"; });
+  svg.addEventListener("mouseleave", ()=>{ tip.style.display="none"; cross.setAttribute("visibility","hidden"); });
+}
+
+function table(el, head, body, textCols=[0]){
+  el.innerHTML = body.length ? `<table><thead><tr>${head.map((h,i)=>`<th${textCols.includes(i)?' class="t"':''}>${h}</th>`).join("")}</tr></thead><tbody>${
+    body.map(r=>`<tr>${r.map((c,i)=>`<td${textCols.includes(i)?' class="t"':''}>${c}</td>`).join("")}</tr>`).join("")}</tbody></table>` : '<div class="empty">데이터 없음</div>';
+}
+
+function tabs(el, regions, onPick){
+  const keys = Object.keys(regions);
+  el.innerHTML = keys.map((k,i)=>`<button aria-pressed="${i===0}" data-k="${k}">${regions[k].label}</button>`).join("");
+  el.addEventListener("click", e=>{ const b = e.target.closest("button"); if(!b) return;
+    el.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed", x===b)); onPick(b.dataset.k); });
+  onPick(keys[0]);
+}
+
+fetch("data.json?"+Date.now()).then(r=>r.json()).then(D=>{
+  const R = D.regions, C = D.combined, Q = D.quarter;
+  document.querySelectorAll(".nd").forEach(e=>e.textContent = D.newItemDays);
+  const lastTs = Object.values(R).map(r=>r.latest && r.latest.ts).filter(Boolean).sort().pop();
+  document.getElementById("meta").textContent = `마지막 수집 ${lastTs ? lastTs.replace("T"," ").slice(0,16) : "–"} KST · 계산 ${D.generatedAt.replace("T"," ").slice(0,16)}`;
+
+  const last7 = C.slice(-7), prev7 = C.slice(-14,-7);
+  const avg = last7.length===7 ? last7.reduce((s,r)=>s+r.revenue,0)/7 : null;
+  const pavg = prev7.length===7 ? prev7.reduce((s,r)=>s+r.revenue,0)/7 : null;
+  const tiles = [
+    ["하루 추정 매출 · 최근 7일 평균", avg==null ? "–" : man(avg)+" 원", pavg ? `전주 ${man(pavg)} 원 대비 ${chg(avg/pavg)}` : "7일치가 쌓이면 표시"],
+    [Q ? `${Q.quarter.slice(-1)}분기 추정 매출` : "분기 추정", Q ? man(Q.estimate)+" 원" : "–",
+      Q ? `관측 ${Q.observedDays}일 + 나머지 ${Q.days-Q.observedDays}일은 최근 속도` : ""],
+    ["직전 분기 실적 대비", Q && Q.qoq!=null ? `${Q.qoq>=0?"+":""}${(Q.qoq*100).toFixed(0)}%` : "–",
+      Q && Q.prevRevenue ? `${Q.prevQuarter.slice(-1)}분기 ${man(Q.prevRevenue)} 원` : "config.py에 분기 실적 입력"],
+  ];
+  document.getElementById("tiles").innerHTML = tiles.map(([k,v,s])=>`<div class="tile"><div class="k">${k}</div><div class="v">${v}</div><div class="s">${s}</div></div>`).join("");
+
+  barLine(document.getElementById("combinedChart"), C, {val:r=>r.revenue, ma:r=>r.revenue_ma7, fmt:man, label:"네 지역 합계 일간 추정 매출"});
+  table(document.getElementById("combinedTable"), ["일자","합계",...Object.values(R).map(r=>r.label)],
+    C.slice().reverse().map(r=>[dl(r.date), man(r.revenue), ...Object.keys(R).map(k=>man(r.byRegion[k]))]));
+
+  const rc = document.getElementById("regionCharts");
+  const cards = Object.entries(R).map(([k,r])=>{
+    const card = document.createElement("div"); card.className = "card";
+    card.innerHTML = `<h3>${r.label}</h3><div class="hv">${r.avg7==null?"–":fmtN(r.avg7)+"건/일"}</div>
+      <div class="meta">7일 평균 · 전주 대비 ${r.wow==null?"14일치 필요":chg(r.wow)}</div>`;
+    rc.appendChild(card); return [card, r];
+  });
+  cards.forEach(([card, r])=> barLine(card, r.series, {val:x=>x.total, ma:x=>x.total_ma7, fmt:fmtN, height:170, label:`${r.label} 일간 신규 채팅`}));
+
+  table(document.getElementById("regionTable"),
+    ["지역","누적 채팅","항목(캐릭터·멀티)","일간 신규 7일 평균","전주 대비","신규 비중","멀티챗 비중","추정 일매출","계수(원/건)"],
+    Object.values(R).map(r=>[r.label, fmtN(r.latest&&r.latest.chatCount),
+      r.latest ? `${r.latest.characters} · ${r.latest.multis}` : "–", fmtN(r.avg7), r.wow==null?"14일치 필요":chg(r.wow),
+      pct(r.newShare7), pct(r.multiShare7), r.avg7_revenue==null?"–":man(r.avg7_revenue), fmtN(r.coef)]));
+
+  tabs(document.getElementById("rankTabs"), R, k=>{
+    const r = R[k];
+    document.getElementById("rankNote").textContent = r.rankingBase ? `${r.rankingBase} 신규 채팅 순(기록이 없는 항목은 누적 순).` : "최근 신규 채팅 순.";
+    const tot = r.latest ? r.latest.chatCount : 0;
+    table(document.getElementById("rankTable"), ["#","항목","최근 신규","누적 채팅","점유율","누적 조회","조회→채팅"],
+      r.ranking.map((x,i)=>[i+1, esc(x.name)+(x.kind==="multi"?" <small>멀티</small>":""), fmtN(x.recent), fmtN(x.chatCount),
+        tot?pct(x.chatCount/tot):"–", fmtN(x.viewCount), x.viewCount?pct(x.chatCount/x.viewCount):"–"]), [0,1]);
+  });
+  tabs(document.getElementById("launchTabs"), R, k=>{
+    const now = new Date(D.generatedAt);
+    table(document.getElementById("launchTable"), ["항목","출시일","경과일","누적 채팅","일평균","최근 신규"],
+      R[k].recentLaunches.map(x=>{ const age = Math.max(0.1,(now - new Date(x.startAt))/864e5);
+        return [esc(x.name)+(x.kind==="multi"?" <small>멀티</small>":""), x.startAt.slice(0,10), age.toFixed(1), fmtN(x.chatCount), fmtN(x.chatCount/age), fmtN(x.recent)]; }), [0,1]);
+  });
+
+  const months = [...new Set(D.commentsMonthly.map(r=>r.month))].sort();
+  table(document.getElementById("commentTable"), ["지역",...months],
+    months.length ? Object.entries(R).map(([k,r])=>[r.label, ...months.map(m=>fmtN((D.commentsMonthly.find(x=>x.region===k&&x.month===m)||{}).comments||0))]) : []);
+
+  table(document.getElementById("calTable"), ["분기","챗 매출","관측 일수","신규 채팅","채팅 1건당 매출"],
+    D.calibration.map(c=>[c.quarter, man(c.revenue)+" 원", c.observedDays, fmtN(c.newChats), c.wonPerChat==null?"수집 기간 부족":fmtN(c.wonPerChat)+" 원"]));
+}).catch(e=>{ document.getElementById("meta").textContent = "data.json을 불러오지 못했습니다: "+e; });
+</script>
+</body>
+</html>

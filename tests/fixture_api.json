@@ -1,0 +1,116 @@
+{
+ "characters": {
+  "success": true,
+  "data": {
+   "data": [
+    {
+     "id": 227,
+     "memberId": 0,
+     "name": "성유나",
+     "originalLanguage": "ko",
+     "creationType": "simulation",
+     "visibility": "public",
+     "isSafetyFilter": false,
+     "genre": "drama",
+     "characterTendency": "male",
+     "isOfficial": true,
+     "viewCount": 91798,
+     "chatCount": 5303,
+     "likeCount": 284,
+     "followCount": 0,
+     "isNew": false,
+     "hasNewStart": false,
+     "hasVoice": false,
+     "createdAt": "2026-05-06T12:40:06.742Z",
+     "updatedAt": "2026-11-25T05:51:48.594Z",
+     "startAt": "2026-05-12T03:00:00.000Z"
+    },
+    {
+     "id": 299,
+     "memberId": 0,
+     "name": "한가연",
+     "originalLanguage": "ko",
+     "creationType": "roleplay",
+     "visibility": "public",
+     "isSafetyFilter": false,
+     "genre": "drama",
+     "characterTendency": "all",
+     "isOfficial": true,
+     "viewCount": 41176,
+     "chatCount": 5179,
+     "likeCount": 291,
+     "followCount": 0,
+     "isNew": false,
+     "hasNewStart": false,
+     "hasVoice": true,
+     "createdAt": "2026-07-07T06:07:22.223Z",
+     "updatedAt": "2026-11-25T06:04:32.613Z",
+     "startAt": "2026-08-25T12:00:00.000Z"
+    }
+   ],
+   "pagination": {
+    "page": 3,
+    "limit": 50,
+    "total": 130,
+    "totalPages": 3
+   }
+  },
+  "error": null
+ },
+ "content": {
+  "success": true,
+  "data": {
+   "items": [
+    {
+     "id": 114,
+     "title": "아줌마는 SOLO",
+     "genre": "romance",
+     "conversationType": "multi",
+     "hasVoice": false,
+     "ageRating": "adult",
+     "viewCount": 258082,
+     "chatCount": 17193,
+     "likeCount": 680,
+     "castCount": 4,
+     "isNew": false,
+     "startAt": "2026-10-04T03:00:00.000Z",
+     "castNames": [
+      "장선영",
+      "한정숙",
+      "정은애",
+      "정은미"
+     ]
+    },
+    {
+     "id": 101,
+     "title": "일진녀들과 무인도에서 살아남기",
+     "genre": "drama",
+     "conversationType": "multi",
+     "hasVoice": false,
+     "ageRating": "adult",
+     "viewCount": 107998,
+     "chatCount": 15152,
+     "likeCount": 596,
+     "castCount": 2,
+     "isNew": false,
+     "startAt": "2026-08-30T12:00:00.000Z",
+     "castNames": [
+      "이서희",
+      "백진아"
+     ]
+    }
+   ],
+   "total": 26,
+   "page": 1,
+   "limit": 2,
+   "totalPages": 13
+  },
+  "error": null
+ },
+ "commentsTotal": 58,
+ "commentsKeys": [
+  "data",
+  "nextCursor",
+  "totalCount"
+ ]
+}
