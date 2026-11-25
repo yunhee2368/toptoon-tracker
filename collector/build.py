@@ -64,6 +64,8 @@ def daily_series(snap_region: dict[str, dict]) -> list[dict]:
         if (date.fromisoformat(d1) - day).days != 1:
             continue  # 하루 이상 비면 그 구간은 계산하지 않음(합쳐서 하루로 세지 않도록)
         a, b = snap_region[d0], snap_region[d1]
+        if a and int(next(iter(a.values()))["ts"][11:13]) >= 3:
+            continue  # 그날 첫 기록이 새벽 3시 이후면 하루치가 아니므로 제외
         row = {"date": d0, "character": 0, "multi": 0, "newItems": 0, "existingItems": 0,
                "launched": 0, "skipped": 0}
         for key, rb in b.items():
